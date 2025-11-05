@@ -1,0 +1,81 @@
+1️⃣ Build the Application Locally
+
+mkdir backend && cd backend
+npm init -y
+npm install express cors
+//server.js
+
+import express from "express";
+import cors from "cors";
+
+const app = express();
+app.use(cors());
+
+app.get("/", (req, res) => {
+  res.send("Hello from AWS Backend!");
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//Run locally:
+
+node server.js
+//💻 Frontend (React)
+npx create-react-app frontend
+cd frontend
+npm run build
+
+2️⃣ Create EC2 Instances
+
+You need 2 backend EC2 instances and 1 frontend EC2 instance.
+
+Steps:
+
+Go to AWS Console → EC2 → Launch Instance
+
+Choose Amazon Linux 2 or Ubuntu 22.04 LTS AMI
+
+Select instance type: t2.micro (Free Tier)
+
+Configure security group:
+
+Allow HTTP (80) and SSH (22) inbound.
+
+Create and download a key pair (.pem) to connect via SSH.
+
+3️⃣ Deploy Backend on EC2
+
+//SSH into the backend instance:
+
+ssh -i your-key.pem ec2-user@<instance-public-ip>
+
+//Install Node.js:
+
+sudo apt update
+sudo apt install -y nodejs npm
+
+//Clone or upload your backend code:
+git clone <your-repo-url> backend
+cd backend
+npm install
+node server.js
+//Test in browser:
+http://<EC2-Public-IP>:5000
+
+4️⃣ Deploy Frontend on EC2
+Launch another EC2 instance for frontend.
+SSH into it and install Nginx:
+sudo apt update
+sudo apt install -y nginx
+Copy your React build folder to /var/www/html:
+sudo rm -rf /var/www/html/*
+sudo cp -r build/* /var/www/html/
+sudo systemctl restart nginx
+Visit frontend IP in browser — you should see your React app!
+
+
+Connect Frontend to Load Balancer
+
+In your React app (e.g., .env file):
+
+REACT_APP_API_URL=http://my-app-alb-123456789.us-east-1.elb.amazonaws.com
