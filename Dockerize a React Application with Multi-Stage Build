@@ -1,0 +1,53 @@
+1️⃣ Create a Sample React App
+npx create-react-app react-docker-app
+cd react-docker-app
+2️⃣ Create a .dockerignore file
+
+
+node_modules
+build
+.git
+Dockerfile
+.dockerignore
+README.md
+
+3️⃣ Create the Multi-Stage Dockerfile
+
+
+
+# ======== Stage 1: Build the React app ========
+FROM node:18-alpine AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy all source files
+COPY . .
+
+# Build the React app
+RUN npm run build
+
+
+# ======== Stage 2: Serve with Nginx ========
+FROM nginx:alpine
+
+# Copy built files from build stage to Nginx directory
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Default Nginx command
+CMD ["nginx", "-g", "daemon off;"]
+
+4️⃣ Build the Docker Image
+
+docker build -t react-docker-app .
+
+5️⃣ Run the Container
+
+docker run -d -p 80:80 react-docker-app
